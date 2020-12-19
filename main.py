@@ -1,6 +1,7 @@
 import requests
 import bs4
 import json
+import sys
 
 from config import VERBOSE_MODE, RETRY, COOKIES, HEADERS
 
@@ -59,14 +60,32 @@ def enroll(round_entity: RoundEntity):
 def find_rounds() -> list:
     url = "http://scu.ticeyun.com/SportWeb/bespeak/testBespeak_query1.jsp"
     response = requests.get(url, headers=HEADERS, cookies=COOKIES)
-    html = response.text
-    soup = bs4.BeautifulSoup(html, features="html.parser")
-    rows = soup.find(name="tr").find_all(name="tr")[2].find_all(name="tr")[2:-1]
+    if response.text.find("页面已过期或者遇到错误") != -1:
+        raise_cookie_not_set_error()
+    soup = bs4.BeautifulSoup(response.text, features="html.parser")
+    rows = soup.find(name="tr").find_all(name="tr")[2].find_all(name="tr")
+    if len(rows) == 2:
+        return []
+    rows = rows[2:-1]
     round_entities = [RoundEntity.parse_from_row(row) for row in rows]
     return round_entities
 
 
+def raise_cookie_not_set_error():
+    print("Cookies 未设置或有误，请按 README 中说明进行设置", file=sys.stderr)
+    exit(1)
+
+
+def check_config():
+    if len(COOKIES) != 2:
+        raise_cookie_not_set_error()
+    for key in COOKIES.keys():
+        if COOKIES[key] == "":
+            raise_cookie_not_set_error()
+
+
 def main():
+    check_config()
     i = 0
     while i == 0 or RETRY:
         i += 1
