@@ -53,8 +53,17 @@ def enroll(round_entity: RoundEntity):
     }
     response = requests.post(url, form_data, headers=HEADERS, cookies=COOKIES)
     soup = bs4.BeautifulSoup(response.text, features="html.parser")
-    message = str(soup.find_all(name="script")[-1]).split()[3].split('\'')[1]
-    print_info("预约结果：", message)
+    alert_script = str(soup.find_all(name="script")[-1])
+    clauses = alert_script.split()
+    possible_splitters = ["\"", "'"]
+    for clause in clauses:
+        if clause.startswith("alert"):
+            for splitter in possible_splitters:
+                if clause.find(splitter) != -1:
+                    message = clause.split(splitter)[1]
+                    print_info("预约结果：", message)
+                    return
+    print_info("网站没有返回任何提示。")
 
 
 def find_rounds() -> list:
@@ -103,7 +112,7 @@ def main():
             print_info(index, json.dumps(round_entity.__dict__))
         if last_available_round is None:
             print_info("没有可预定场次。")
-            continue
+            # continue
 
         print_info("尝试预定其中最后一个场次...")
         enroll(round_entities[-1])
