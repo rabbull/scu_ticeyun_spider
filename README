@@ -1,0 +1,18 @@
+==================
+SCU_TICEYUN_SPIDER
+==================
+
+DEPENDENCIES:
+0. python3
+1. beautifulsoup4
+2. requests
+
+USAGE:
+0. 按照正常流程登陆 SPORTOA
+1. 使用网页开发工具获取自己的 Cookie
+2. 编辑 config.py 并将 Cookie 填入相应位置
+3. 使用 python3 运行 main.py
+
+DISCLAMER:
+0. 该脚本未经过任何测试
+1. 在真实的体测预约中禁止使用该脚本
